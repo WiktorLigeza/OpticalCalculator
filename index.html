@@ -1,0 +1,224 @@
+﻿<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OptiCalc - Vision Setup</title>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://unpkg.com/three@0.160.0/build/three.module.js",
+          "three/addons/": "https://unpkg.com/three@0.160.0/examples/jsm/"
+        }
+      }
+    </script>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="bg-grid"></div>
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark"></span>
+        <div>
+          <div class="brand-title">OptiCalc</div>
+          <div class="brand-sub">Camera Setup Calculator</div>
+        </div>
+      </div>
+      <div class="status" id="statusMessage" role="status" aria-live="polite"></div>
+    </header>
+
+    <main class="layout">
+      <section class="panel" id="controlsPanel">
+        <div class="panel-header">
+          <h2>Inputs</h2>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Distance</h3>
+            <button class="lock" data-lock="distance" aria-pressed="true" title="Lock distance">
+              <span class="lock-icon"></span>
+            </button>
+          </div>
+          <div class="row">
+            <label>
+              <span>Plane Distance (mm)</span>
+              <input type="number" id="distance" min="1" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Sensor</h3>
+            <div class="meta">
+              <span id="sensorLabel">Sony IMX5030</span>
+            </div>
+            <button class="lock" data-lock="sensor" aria-pressed="true" title="Lock sensor">
+              <span class="lock-icon"></span>
+            </button>
+          </div>
+          <div class="row two">
+            <label>
+              <span>Sensor Width (mm)</span>
+              <input type="number" id="sensorW" min="0.1" step="0.01" />
+            </label>
+            <label>
+              <span>Sensor Height (mm)</span>
+              <input type="number" id="sensorH" min="0.1" step="0.01" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>ROI</h3>
+            <button class="lock" data-lock="roi" aria-pressed="true" title="Lock ROI">
+              <span class="lock-icon"></span>
+            </button>
+          </div>
+          <div class="row two">
+            <label>
+              <span>ROI Width (mm)</span>
+              <input type="number" id="roiW" min="1" step="1" />
+            </label>
+            <label>
+              <span>ROI Height (mm)</span>
+              <input type="number" id="roiH" min="1" step="1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>ROI-Fit FOV (deg)</h3>
+            <button class="visibility" data-visible="fitFov" aria-pressed="true" title="Toggle ROI-fit FOV">
+              <span class="visibility-icon"></span>
+            </button>
+          </div>
+          <div class="row two">
+            <label>
+              <span>HFOV (deg)</span>
+              <input type="number" id="hfov" min="1" max="179" step="0.1" />
+            </label>
+            <label>
+              <span>VFOV (deg)</span>
+              <input type="number" id="vfov" min="1" max="179" step="0.1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Reference FOV (deg)</h3>
+            <button class="lock" data-lock="refFov" aria-pressed="false" title="Lock reference FOV">
+              <span class="lock-icon"></span>
+            </button>
+            <button class="visibility" data-visible="refFov" aria-pressed="true" title="Toggle reference FOV">
+              <span class="visibility-icon"></span>
+            </button>
+          </div>
+          <div class="row two">
+            <label>
+              <span>HFOV (deg)</span>
+              <input type="number" id="refHfov" min="1" max="179" step="0.1" />
+            </label>
+            <label>
+              <span>VFOV (deg)</span>
+              <input type="number" id="refVfov" min="1" max="179" step="0.1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Derived</h3>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Lens (ROI-fit)</div>
+              <div class="stat-value" id="lensFitValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Lens (Reference)</div>
+              <div class="stat-value" id="lensRefValue">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Coverage (ROI-fit)</div>
+              <div class="stat-value" id="coverageFitValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Coverage (Reference)</div>
+              <div class="stat-value" id="coverageRefValue">--</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Resolution (optional)</h3>
+          </div>
+          <div class="row two">
+            <label>
+              <span>Resolution Width (px)</span>
+              <input type="number" id="resW" min="1" step="1" />
+            </label>
+            <label>
+              <span>Resolution Height (px)</span>
+              <input type="number" id="resH" min="1" step="1" />
+            </label>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Pix / mm (X)</div>
+              <div class="stat-value" id="pixPerMmX">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Pix / mm (Y)</div>
+              <div class="stat-value" id="pixPerMmY">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">mm / pix (X)</div>
+              <div class="stat-value" id="mmPerPixX">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">mm / pix (Y)</div>
+              <div class="stat-value" id="mmPerPixY">--</div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel scene">
+        <div class="panel-header">
+          <h2>3D View</h2>
+          <div class="panel-actions">
+            <button id="resetViewBtn" class="btn ghost">Reset View</button>
+          </div>
+        </div>
+        <div id="sceneWrap"></div>
+        <div class="group presets">
+          <div class="group-head">
+            <h3>Presets</h3>
+            <button id="savePresetBtn" class="btn">Save Preset</button>
+          </div>
+          <div class="row">
+            <label>
+              <span>Preset Title</span>
+              <input type="text" id="presetTitle" placeholder="Line 1 setup" />
+            </label>
+          </div>
+          <div class="row">
+            <ul class="preset-list" id="presetList"></ul>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <script type="module" src="js/main.js"></script>
+  </body>
+</html>
