@@ -28,10 +28,8 @@ export function bindUI(
   const visibilityButtons = document.querySelectorAll('.visibility');
   const lensFitWValue = document.getElementById('lensFitWValue');
   const lensFitHValue = document.getElementById('lensFitHValue');
-  const lensFitMaxValue = document.getElementById('lensFitMaxValue');
   const lensRefWValue = document.getElementById('lensRefWValue');
   const lensRefHValue = document.getElementById('lensRefHValue');
-  const lensRefMaxValue = document.getElementById('lensRefMaxValue');
   const coverageFitValue = document.getElementById('coverageFitValue');
   const coverageRefValue = document.getElementById('coverageRefValue');
   const pixPerMmX = document.getElementById('pixPerMmX');
@@ -73,10 +71,8 @@ export function bindUI(
   function updateDerived() {
     lensFitWValue.textContent = Number.isFinite(state.fitLensW) ? `${round(state.fitLensW, 8)} mm` : '--';
     lensFitHValue.textContent = Number.isFinite(state.fitLensH) ? `${round(state.fitLensH, 8)} mm` : '--';
-    lensFitMaxValue.textContent = Number.isFinite(state.fitLens) ? `${round(state.fitLens, 8)} mm` : '--';
     lensRefWValue.textContent = Number.isFinite(state.refLensW) ? `${round(state.refLensW, 8)} mm` : '--';
     lensRefHValue.textContent = Number.isFinite(state.refLensH) ? `${round(state.refLensH, 8)} mm` : '--';
-    lensRefMaxValue.textContent = Number.isFinite(state.refLens) ? `${round(state.refLens, 8)} mm` : '--';
 
     const fitCoverage = coverageStatus(state.roiW, state.roiH, state.roiW, state.roiH);
     const fitRatio = Math.min(fitCoverage.areaRatio * 100, 999);
