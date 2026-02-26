@@ -1,4 +1,4 @@
-﻿import { loadState, saveState } from './state.js';
+﻿import { DEFAULT_STATE, loadState, saveState } from './state.js';
 import { deriveLens, fovMmFromDeg } from './calc.js';
 import { loadPresets, addPreset, removePreset } from './presets.js';
 import { bindUI } from './ui.js';
@@ -126,14 +126,17 @@ function handlePresetSave(title) {
 function handlePresetLoad(id) {
   const preset = presets.find((item) => item.id === id);
   if (!preset) return;
-  
-  // Merge preset state with defaults to ensure all properties exist
-  state = {
-    ...state, // Keep current state as base
-    ...preset.state, // Override with preset values
-    locks: { ...state.locks, ...(preset.state.locks || {}) },
-    visibility: { ...state.visibility, ...(preset.state.visibility || {}) },
+
+  const snapshot = JSON.parse(JSON.stringify(preset.state || {}));
+  const normalized = {
+    ...DEFAULT_STATE,
+    ...snapshot,
+    visibility: { ...DEFAULT_STATE.visibility, ...(snapshot.visibility || {}) },
+    locks: { ...DEFAULT_STATE.locks, ...(snapshot.locks || {}) },
   };
+
+  Object.keys(state).forEach((key) => delete state[key]);
+  Object.assign(state, normalized);
   
   computeDerived();
   updateUI();
