@@ -44,7 +44,7 @@
           <div class="row">
             <label>
               <span>Plane Distance (mm)</span>
-              <input type="number" id="distance" min="1" step="1" />
+              <input type="number" id="distance" min="1" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -62,11 +62,11 @@
           <div class="row two">
             <label>
               <span>Sensor Width (mm)</span>
-              <input type="number" id="sensorW" min="0.1" step="0.01" />
+              <input type="number" id="sensorW" min="0.1" step="0.00000001" />
             </label>
             <label>
               <span>Sensor Height (mm)</span>
-              <input type="number" id="sensorH" min="0.1" step="0.01" />
+              <input type="number" id="sensorH" min="0.1" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -81,11 +81,11 @@
           <div class="row two">
             <label>
               <span>ROI Width (mm)</span>
-              <input type="number" id="roiW" min="1" step="1" />
+              <input type="number" id="roiW" min="1" step="0.00000001" />
             </label>
             <label>
               <span>ROI Height (mm)</span>
-              <input type="number" id="roiH" min="1" step="1" />
+              <input type="number" id="roiH" min="1" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -100,11 +100,11 @@
           <div class="row two">
             <label>
               <span>HFOV (deg)</span>
-              <input type="number" id="hfov" min="1" max="179" step="0.1" />
+              <input type="number" id="hfov" min="1" max="179" step="0.00000001" />
             </label>
             <label>
               <span>VFOV (deg)</span>
-              <input type="number" id="vfov" min="1" max="179" step="0.1" />
+              <input type="number" id="vfov" min="1" max="179" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -122,11 +122,11 @@
           <div class="row two">
             <label>
               <span>HFOV (deg)</span>
-              <input type="number" id="refHfov" min="1" max="179" step="0.1" />
+              <input type="number" id="refHfov" min="1" max="179" step="0.00000001" />
             </label>
             <label>
               <span>VFOV (deg)</span>
-              <input type="number" id="refVfov" min="1" max="179" step="0.1" />
+              <input type="number" id="refVfov" min="1" max="179" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -137,12 +137,32 @@
           </div>
           <div class="row two">
             <div class="stat">
-              <div class="stat-label">Lens (ROI-fit)</div>
-              <div class="stat-value" id="lensFitValue">--</div>
+              <div class="stat-label">Lens (ROI-fit) - Width</div>
+              <div class="stat-value" id="lensFitWValue">--</div>
             </div>
             <div class="stat">
-              <div class="stat-label">Lens (Reference)</div>
-              <div class="stat-value" id="lensRefValue">--</div>
+              <div class="stat-label">Lens (ROI-fit) - Height</div>
+              <div class="stat-value" id="lensFitHValue">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Lens (ROI-fit) - Max Used</div>
+              <div class="stat-value" id="lensFitMaxValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Lens (Reference) - Max Used</div>
+              <div class="stat-value" id="lensRefMaxValue">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Lens (Reference) - Width</div>
+              <div class="stat-value" id="lensRefWValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Lens (Reference) - Height</div>
+              <div class="stat-value" id="lensRefHValue">--</div>
             </div>
           </div>
           <div class="row two">
@@ -164,11 +184,11 @@
           <div class="row two">
             <label>
               <span>Resolution Width (px)</span>
-              <input type="number" id="resW" min="1" step="1" />
+              <input type="number" id="resW" min="1" step="0.00000001" />
             </label>
             <label>
               <span>Resolution Height (px)</span>
-              <input type="number" id="resH" min="1" step="1" />
+              <input type="number" id="resH" min="1" step="0.00000001" />
             </label>
           </div>
           <div class="row two">

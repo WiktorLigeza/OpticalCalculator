@@ -3,7 +3,7 @@ const EPS = 1e-6;
 export function deriveLens(distance, sensorW, sensorH, fovW, fovH) {
   const lensW = distance * sensorW / Math.max(fovW, EPS);
   const lensH = distance * sensorH / Math.max(fovH, EPS);
-  const lens = (lensW + lensH) / 2;
+  const lens = Math.max(lensW, lensH); // Use maximum focal length
   const delta = Math.abs(lensW - lensH);
   return { lens, lensW, lensH, delta };
 }

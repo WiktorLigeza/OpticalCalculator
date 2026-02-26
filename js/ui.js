@@ -26,8 +26,12 @@ export function bindUI(
 
   const lockButtons = document.querySelectorAll('.lock');
   const visibilityButtons = document.querySelectorAll('.visibility');
-  const lensFitValue = document.getElementById('lensFitValue');
-  const lensRefValue = document.getElementById('lensRefValue');
+  const lensFitWValue = document.getElementById('lensFitWValue');
+  const lensFitHValue = document.getElementById('lensFitHValue');
+  const lensFitMaxValue = document.getElementById('lensFitMaxValue');
+  const lensRefWValue = document.getElementById('lensRefWValue');
+  const lensRefHValue = document.getElementById('lensRefHValue');
+  const lensRefMaxValue = document.getElementById('lensRefMaxValue');
   const coverageFitValue = document.getElementById('coverageFitValue');
   const coverageRefValue = document.getElementById('coverageRefValue');
   const pixPerMmX = document.getElementById('pixPerMmX');
@@ -42,15 +46,15 @@ export function bindUI(
   const sensorLabel = document.getElementById('sensorLabel');
 
   function updateInputs() {
-    inputs.distance.value = round(state.distance, 0);
-    inputs.sensorW.value = round(state.sensorW, 2);
-    inputs.sensorH.value = round(state.sensorH, 2);
-    inputs.roiW.value = round(state.roiW, 0);
-    inputs.roiH.value = round(state.roiH, 0);
-    inputs.hfov.value = round(fovDegFromMm(state.distance, state.roiW), 2);
-    inputs.vfov.value = round(fovDegFromMm(state.distance, state.roiH), 2);
-    inputs.refHfov.value = round(state.refHfov, 2);
-    inputs.refVfov.value = round(state.refVfov, 2);
+    inputs.distance.value = round(state.distance, 6);
+    inputs.sensorW.value = round(state.sensorW, 8);
+    inputs.sensorH.value = round(state.sensorH, 8);
+    inputs.roiW.value = round(state.roiW, 6);
+    inputs.roiH.value = round(state.roiH, 6);
+    inputs.hfov.value = round(fovDegFromMm(state.distance, state.roiW), 8);
+    inputs.vfov.value = round(fovDegFromMm(state.distance, state.roiH), 8);
+    inputs.refHfov.value = round(state.refHfov, 8);
+    inputs.refVfov.value = round(state.refVfov, 8);
     inputs.resW.value = state.resW ? round(state.resW, 0) : '';
     inputs.resH.value = state.resH ? round(state.resH, 0) : '';
     sensorLabel.textContent = state.sensorLabel;
@@ -67,8 +71,12 @@ export function bindUI(
   }
 
   function updateDerived() {
-    lensFitValue.textContent = Number.isFinite(state.fitLens) ? `${round(state.fitLens, 2)} mm` : '--';
-    lensRefValue.textContent = Number.isFinite(state.refLens) ? `${round(state.refLens, 2)} mm` : '--';
+    lensFitWValue.textContent = Number.isFinite(state.fitLensW) ? `${round(state.fitLensW, 8)} mm` : '--';
+    lensFitHValue.textContent = Number.isFinite(state.fitLensH) ? `${round(state.fitLensH, 8)} mm` : '--';
+    lensFitMaxValue.textContent = Number.isFinite(state.fitLens) ? `${round(state.fitLens, 8)} mm` : '--';
+    lensRefWValue.textContent = Number.isFinite(state.refLensW) ? `${round(state.refLensW, 8)} mm` : '--';
+    lensRefHValue.textContent = Number.isFinite(state.refLensH) ? `${round(state.refLensH, 8)} mm` : '--';
+    lensRefMaxValue.textContent = Number.isFinite(state.refLens) ? `${round(state.refLens, 8)} mm` : '--';
 
     const fitCoverage = coverageStatus(state.roiW, state.roiH, state.roiW, state.roiH);
     const fitRatio = Math.min(fitCoverage.areaRatio * 100, 999);
@@ -85,10 +93,10 @@ export function bindUI(
     coverageRefValue.style.color = refCoverage.fits ? 'var(--success)' : 'var(--error)';
 
     if (state.resW > 0 && state.resH > 0) {
-      pixPerMmX.textContent = round(state.resW / state.roiW, 2);
-      pixPerMmY.textContent = round(state.resH / state.roiH, 2);
-      mmPerPixX.textContent = round(state.roiW / state.resW, 4);
-      mmPerPixY.textContent = round(state.roiH / state.resH, 4);
+      pixPerMmX.textContent = round(state.resW / state.roiW, 8);
+      pixPerMmY.textContent = round(state.resH / state.roiH, 8);
+      mmPerPixX.textContent = round(state.roiW / state.resW, 8);
+      mmPerPixY.textContent = round(state.roiH / state.resH, 8);
     } else {
       pixPerMmX.textContent = '--';
       pixPerMmY.textContent = '--';

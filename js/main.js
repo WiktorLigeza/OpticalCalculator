@@ -26,8 +26,12 @@ function computeDerived() {
   const refLensData = deriveLens(state.distance, state.sensorW, state.sensorH, refFovW, refFovH);
 
   state.fitLens = fitLensData.lens;
+  state.fitLensW = fitLensData.lensW;
+  state.fitLensH = fitLensData.lensH;
   state.fitLensDelta = fitLensData.delta;
   state.refLens = refLensData.lens;
+  state.refLensW = refLensData.lensW;
+  state.refLensH = refLensData.lensH;
   state.refLensDelta = refLensData.delta;
   state.refFovW = refFovW;
   state.refFovH = refFovH;
@@ -122,7 +126,15 @@ function handlePresetSave(title) {
 function handlePresetLoad(id) {
   const preset = presets.find((item) => item.id === id);
   if (!preset) return;
-  state = { ...preset.state, locks: { ...preset.state.locks }, visibility: { ...preset.state.visibility } };
+  
+  // Merge preset state with defaults to ensure all properties exist
+  state = {
+    ...state, // Keep current state as base
+    ...preset.state, // Override with preset values
+    locks: { ...state.locks, ...(preset.state.locks || {}) },
+    visibility: { ...state.visibility, ...(preset.state.visibility || {}) },
+  };
+  
   computeDerived();
   updateUI();
 }
