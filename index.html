@@ -36,21 +36,6 @@
 
         <div class="group">
           <div class="group-head">
-            <h3>Distance</h3>
-            <button class="lock" data-lock="distance" aria-pressed="true" title="Lock distance">
-              <span class="lock-icon"></span>
-            </button>
-          </div>
-          <div class="row">
-            <label>
-              <span>Plane Distance (mm)</span>
-              <input type="number" id="distance" min="1" step="0.00000001" />
-            </label>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-head">
             <h3>Sensor</h3>
             <div class="meta">
               <span id="sensorLabel">Sony IMX5030</span>
@@ -67,6 +52,21 @@
             <label>
               <span>Sensor Height (mm)</span>
               <input type="number" id="sensorH" min="0.1" step="0.00000001" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
+            <h3>Distance</h3>
+            <button class="lock" data-lock="distance" aria-pressed="true" title="Lock distance">
+              <span class="lock-icon"></span>
+            </button>
+          </div>
+          <div class="row">
+            <label>
+              <span>Plane Distance (mm)</span>
+              <input type="number" id="distance" min="1" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -92,41 +92,15 @@
 
         <div class="group">
           <div class="group-head">
-            <h3>ROI-Fit FOV (deg)</h3>
-            <button class="visibility" data-visible="fitFov" aria-pressed="true" title="Toggle ROI-fit FOV">
-              <span class="visibility-icon"></span>
-            </button>
-          </div>
-          <div class="row two">
-            <label>
-              <span>HFOV (deg)</span>
-              <input type="number" id="hfov" min="1" max="179" step="0.00000001" />
-            </label>
-            <label>
-              <span>VFOV (deg)</span>
-              <input type="number" id="vfov" min="1" max="179" step="0.00000001" />
-            </label>
-          </div>
-        </div>
-
-        <div class="group">
-          <div class="group-head">
-            <h3>Reference FOV (deg)</h3>
-            <button class="lock" data-lock="refFov" aria-pressed="false" title="Lock reference FOV">
+            <h3>Focal Length</h3>
+            <button class="lock" data-lock="lens" aria-pressed="false" title="Lock focal length">
               <span class="lock-icon"></span>
             </button>
-            <button class="visibility" data-visible="refFov" aria-pressed="true" title="Toggle reference FOV">
-              <span class="visibility-icon"></span>
-            </button>
           </div>
-          <div class="row two">
+          <div class="row">
             <label>
-              <span>HFOV (deg)</span>
-              <input type="number" id="refHfov" min="1" max="179" step="0.00000001" />
-            </label>
-            <label>
-              <span>VFOV (deg)</span>
-              <input type="number" id="refVfov" min="1" max="179" step="0.00000001" />
+              <span>Focal Length (mm)</span>
+              <input type="number" id="focalLength" min="0.1" step="0.00000001" />
             </label>
           </div>
         </div>
@@ -137,32 +111,12 @@
           </div>
           <div class="row two">
             <div class="stat">
-              <div class="stat-label">Fx (ROI-fit)</div>
-              <div class="stat-value" id="lensFitWValue">--</div>
+              <div class="stat-label">HFOV (deg)</div>
+              <div class="stat-value" id="hfovDeg">--</div>
             </div>
             <div class="stat">
-              <div class="stat-label">Fy (ROI-fit)</div>
-              <div class="stat-value" id="lensFitHValue">--</div>
-            </div>
-          </div>
-          <div class="row two">
-            <div class="stat">
-              <div class="stat-label">Fx (Reference)</div>
-              <div class="stat-value" id="lensRefWValue">--</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Fy (Reference)</div>
-              <div class="stat-value" id="lensRefHValue">--</div>
-            </div>
-          </div>
-          <div class="row two">
-            <div class="stat">
-              <div class="stat-label">Coverage (ROI-fit)</div>
-              <div class="stat-value" id="coverageFitValue">--</div>
-            </div>
-            <div class="stat">
-              <div class="stat-label">Coverage (Reference)</div>
-              <div class="stat-value" id="coverageRefValue">--</div>
+              <div class="stat-label">VFOV (deg)</div>
+              <div class="stat-value" id="vfovDeg">--</div>
             </div>
           </div>
         </div>

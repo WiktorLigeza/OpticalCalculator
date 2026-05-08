@@ -1,25 +1,20 @@
-const STORAGE_KEY = 'opticalcalc_state_v1';
+const STORAGE_KEY = 'opticalcalc_state_v2';
 
 export const DEFAULT_STATE = {
   distance: 2000,
-  roiW: 850,
-  roiH: 1250,
-  refHfov: 30,
-  refVfov: 20,
   sensorW: 8.8,
   sensorH: 6.6,
   sensorLabel: 'Sony IMX5030 (verify size)',
+  roiW: 850,
+  roiH: 1250,
+  focalLength: 12,
   resW: 0,
   resH: 0,
-  visibility: {
-    fitFov: true,
-    refFov: true,
-  },
   locks: {
     distance: true,
-    roi: true,
     sensor: true,
-    refFov: false,
+    roi: true,
+    lens: false,
   },
 };
 
@@ -31,7 +26,6 @@ export function loadState() {
     return {
       ...DEFAULT_STATE,
       ...parsed,
-      visibility: { ...DEFAULT_STATE.visibility, ...(parsed.visibility || {}) },
       locks: { ...DEFAULT_STATE.locks, ...(parsed.locks || {}) },
     };
   } catch (err) {

@@ -45,7 +45,6 @@ export function createScene(container) {
   cameraBody.add(lens);
 
   const fitFrustumMaterial = new THREE.LineBasicMaterial({ color: 0x33e2ff });
-  const refFrustumMaterial = new THREE.LineBasicMaterial({ color: 0x37ff8b });
   const roiMaterial = new THREE.MeshStandardMaterial({
     color: 0x8a7dff,
     emissive: 0x120f2a,
@@ -59,25 +58,16 @@ export function createScene(container) {
   const fitFrustumLines = new THREE.LineSegments(new THREE.BufferGeometry(), fitFrustumMaterial);
   scene.add(fitFrustumLines);
 
-  const refFrustumLines = new THREE.LineSegments(new THREE.BufferGeometry(), refFrustumMaterial);
-  scene.add(refFrustumLines);
-
   const roiPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), roiMaterial);
   roiPlane.rotation.x = -Math.PI / 2;
   scene.add(roiPlane);
 
   const state = {
     distance: 2,
-    fitFovW: 1.2,
-    fitFovH: 0.8,
-    refFovW: 1.2,
-    refFovH: 0.8,
+    fovW: 1.2,
+    fovH: 0.8,
     roiW: 1.1,
     roiH: 0.7,
-    visibility: {
-      fitFov: true,
-      refFov: true,
-    },
   };
 
   function buildFrustum(fovW, fovH) {
@@ -107,21 +97,14 @@ export function createScene(container) {
     cameraBody.position.set(0, distance, 0);
     cameraBody.lookAt(0, 0, 0);
 
-    const fitGeometry = buildFrustum(state.fitFovW, state.fitFovH);
+    const fitGeometry = buildFrustum(state.fovW, state.fovH);
     fitFrustumLines.geometry.dispose();
     fitFrustumLines.geometry = fitGeometry;
-
-    const refGeometry = buildFrustum(state.refFovW, state.refFovH);
-    refFrustumLines.geometry.dispose();
-    refFrustumLines.geometry = refGeometry;
 
     const roiW = Math.max(state.roiW * SCALE, 0.001);
     const roiH = Math.max(state.roiH * SCALE, 0.001);
     roiPlane.geometry.dispose();
     roiPlane.geometry = new THREE.PlaneGeometry(roiW, roiH);
-
-    fitFrustumLines.visible = state.visibility.fitFov;
-    refFrustumLines.visible = state.visibility.refFov;
   }
 
   function resize() {
@@ -147,13 +130,10 @@ export function createScene(container) {
   return {
     update(values) {
       state.distance = values.distance;
-      state.fitFovW = values.fitFovW;
-      state.fitFovH = values.fitFovH;
-      state.refFovW = values.refFovW;
-      state.refFovH = values.refFovH;
+      state.fovW = values.roiW;
+      state.fovH = values.roiH;
       state.roiW = values.roiW;
       state.roiH = values.roiH;
-      state.visibility = values.visibility;
       updateGeometry();
     },
     resetView() {

@@ -191,6 +191,14 @@ input:focus {
   box-shadow: 0 0 0 2px rgba(51, 226, 255, 0.2);
 }
 
+input.is-derived,
+input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  border-color: rgba(120, 160, 255, 0.12);
+  color: var(--muted);
+}
+
 .lock {
   width: 36px;
   height: 36px;

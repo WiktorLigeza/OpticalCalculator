@@ -1,5 +1,5 @@
 ﻿import { DEFAULT_STATE, loadState, saveState } from './state.js';
-import { deriveLens, fovMmFromDeg } from './calc.js';
+import { computeUnlockedGroup } from './calc.js';
 import { loadPresets, addPreset, removePreset } from './presets.js';
 import { bindUI } from './ui.js';
 import { createScene } from './three-scene.js';
@@ -13,28 +13,12 @@ const lockMap = {
   sensorH: 'sensor',
   roiW: 'roi',
   roiH: 'roi',
-  hfov: 'roi',
-  vfov: 'roi',
-  refHfov: 'refFov',
-  refVfov: 'refFov',
+  focalLength: 'lens',
 };
 
 function computeDerived() {
-  const fitLensData = deriveLens(state.distance, state.sensorW, state.sensorH, state.roiW, state.roiH);
-  const refFovW = fovMmFromDeg(state.distance, state.refHfov);
-  const refFovH = fovMmFromDeg(state.distance, state.refVfov);
-  const refLensData = deriveLens(state.distance, state.sensorW, state.sensorH, refFovW, refFovH);
-
-  state.fitLens = fitLensData.lens;
-  state.fitLensW = fitLensData.lensW;
-  state.fitLensH = fitLensData.lensH;
-  state.fitLensDelta = fitLensData.delta;
-  state.refLens = refLensData.lens;
-  state.refLensW = refLensData.lensW;
-  state.refLensH = refLensData.lensH;
-  state.refLensDelta = refLensData.delta;
-  state.refFovW = refFovW;
-  state.refFovH = refFovH;
+  const result = computeUnlockedGroup(state);
+  Object.assign(state, result);
 }
 
 function updateUI() {
@@ -46,11 +30,6 @@ function updateUI() {
     distance: state.distance,
     roiW: state.roiW,
     roiH: state.roiH,
-    fitFovW: state.roiW,
-    fitFovH: state.roiH,
-    refFovW: state.refFovW,
-    refFovH: state.refFovH,
-    visibility: state.visibility,
   });
 }
 
@@ -62,29 +41,14 @@ function updateState(key, value) {
     return;
   }
 
-  if (key === 'hfov') {
-    state.roiW = fovMmFromDeg(state.distance, value);
-  } else if (key === 'vfov') {
-    state.roiH = fovMmFromDeg(state.distance, value);
-  } else if (key === 'refHfov') {
-    state.refHfov = value;
-  } else if (key === 'refVfov') {
-    state.refVfov = value;
-  } else {
-    state[key] = value;
-  }
-
+  state[key] = value;
   computeDerived();
   updateUI();
 }
 
 function toggleLock(key) {
   state.locks[key] = !state.locks[key];
-  updateUI();
-}
-
-function toggleVisibility(key) {
-  state.visibility[key] = !state.visibility[key];
+  computeDerived();
   updateUI();
 }
 
@@ -93,22 +57,19 @@ function refreshStatus() {
     ui.updateStatus('ROI dimensions must be positive.', 'error');
     return;
   }
-
-  if (state.refFovW && (state.roiW > state.refFovW || state.roiH > state.refFovH)) {
-    ui.updateStatus('ROI exceeds reference FOV. Increase reference FOV or distance.', 'error');
+  if (state.focalLength <= 0) {
+    ui.updateStatus('Focal length must be positive.', 'error');
     return;
   }
-
-  if (state.fitLensDelta > 0.3 || state.refLensDelta > 0.3) {
-    ui.updateStatus('FOV aspect mismatch with sensor size. Check sensor or FOV values.', 'error');
+  const lockedCount = Object.values(state.locks).filter(Boolean).length;
+  if (lockedCount === 4) {
+    ui.updateStatus('All groups locked — unlock one to derive its value.', 'error');
     return;
   }
-
-  if (state.sensorLabel.includes('verify')) {
-    ui.updateStatus('Sensor size is set to a placeholder. Update to the exact IMX5030 dimensions.');
+  if (state.sensorLabel && state.sensorLabel.includes('verify')) {
+    ui.updateStatus('Sensor size is a placeholder. Update to exact dimensions.');
     return;
   }
-
   ui.updateStatus('All values consistent.');
 }
 
@@ -131,13 +92,12 @@ function handlePresetLoad(id) {
   const normalized = {
     ...DEFAULT_STATE,
     ...snapshot,
-    visibility: { ...DEFAULT_STATE.visibility, ...(snapshot.visibility || {}) },
     locks: { ...DEFAULT_STATE.locks, ...(snapshot.locks || {}) },
   };
 
   Object.keys(state).forEach((key) => delete state[key]);
   Object.assign(state, normalized);
-  
+
   computeDerived();
   updateUI();
 }
@@ -153,7 +113,6 @@ const ui = bindUI(
   state,
   updateState,
   toggleLock,
-  toggleVisibility,
   handlePresetSave,
   handlePresetLoad,
   handlePresetDelete,
@@ -169,9 +128,4 @@ scene.update({
   distance: state.distance,
   roiW: state.roiW,
   roiH: state.roiH,
-  fitFovW: state.roiW,
-  fitFovH: state.roiH,
-  refFovW: state.refFovW,
-  refFovH: state.refFovH,
-  visibility: state.visibility,
 });

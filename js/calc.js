@@ -1,41 +1,40 @@
 const EPS = 1e-6;
 
-export function deriveLens(distance, sensorW, sensorH, fovW, fovH) {
-  const lensW = distance * sensorW / Math.max(fovW, EPS);
-  const lensH = distance * sensorH / Math.max(fovH, EPS);
-  const lens = Math.max(lensW, lensH); // Use maximum focal length
-  const delta = Math.abs(lensW - lensH);
-  return { lens, lensW, lensH, delta };
-}
+/**
+ * Multi-way calculator: given distance, sensorW/H, roiW/H, focalLength —
+ * computes the first unlocked group from the other three.
+ *
+ * Optical relation: focalLength = distance * sensorW / roiW
+ *                                = distance * sensorH / roiH
+ */
+export function computeUnlockedGroup(state) {
+  const { distance, sensorW, sensorH, roiW, roiH, focalLength, locks } = state;
+  const f = Math.max(focalLength, EPS);
+  const d = Math.max(distance, EPS);
+  const sW = Math.max(sensorW, EPS);
+  const sH = Math.max(sensorH, EPS);
+  const rW = Math.max(roiW, EPS);
+  const rH = Math.max(roiH, EPS);
 
-export function computeFov(distance, sensorW, sensorH, lens) {
-  const fovW = distance * sensorW / Math.max(lens, EPS);
-  const fovH = distance * sensorH / Math.max(lens, EPS);
-  return { fovW, fovH };
-}
-
-export function coverageStatus(roiW, roiH, fovW, fovH) {
-  const fits = roiW <= fovW && roiH <= fovH;
-  const areaRatio = (roiW * roiH) / Math.max(fovW * fovH, EPS);
-  return {
-    fits,
-    areaRatio,
-    widthRatio: roiW / Math.max(fovW, EPS),
-    heightRatio: roiH / Math.max(fovH, EPS),
-  };
+  if (!locks.lens) {
+    return { focalLength: d * sW / rW };
+  }
+  if (!locks.distance) {
+    return { distance: f * rW / sW };
+  }
+  if (!locks.roi) {
+    return { roiW: d * sW / f, roiH: d * sH / f };
+  }
+  if (!locks.sensor) {
+    return { sensorW: f * rW / d, sensorH: f * rH / d };
+  }
+  return {};
 }
 
 export function fovDegFromMm(distance, fovMm) {
   const safeDistance = Math.max(distance, EPS);
   const halfAngle = Math.atan((fovMm / 2) / safeDistance);
   return (halfAngle * 2 * 180) / Math.PI;
-}
-
-export function fovMmFromDeg(distance, fovDeg) {
-  const safeDistance = Math.max(distance, EPS);
-  const clamped = Math.min(Math.max(fovDeg, 0.001), 179.9);
-  const halfAngle = (clamped * Math.PI) / 360;
-  return 2 * safeDistance * Math.tan(halfAngle);
 }
 
 export function round(value, digits = 1) {
