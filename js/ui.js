@@ -83,27 +83,11 @@ export function bindUI(
 
     // Mark derived (computed) inputs as readonly with distinct style
     Object.entries(inputs).forEach(([key, input]) => {
-      let isDerived = false;
-      if (key === 'roiW') {
-        isDerived = state.solveFor === 'roi' || (state.roiAxis || 'W') === 'H';
-      } else if (key === 'roiH') {
-        isDerived = state.solveFor === 'roi' || (state.roiAxis || 'W') === 'W';
-      } else {
-        const group = inputGroup[key];
-        if (group) isDerived = group === state.solveFor;
-      }
+      const group = inputGroup[key];
+      const isDerived = group ? group === state.solveFor : false;
       input.readOnly = isDerived;
       input.classList.toggle('is-derived', isDerived);
     });
-
-    // Show actual coverage in the derived ROI inputs
-    if (state.solveFor !== 'roi') {
-      if ((state.roiAxis || 'W') === 'W' && state.actualRoiH != null) {
-        setIfNotFocused(inputs.roiH, round(state.actualRoiH, 1));
-      } else if ((state.roiAxis || 'W') === 'H' && state.actualRoiW != null) {
-        setIfNotFocused(inputs.roiW, round(state.actualRoiW, 1));
-      }
-    }
   }
 
   function updateDerived() {
@@ -147,10 +131,10 @@ export function bindUI(
     }
 
     if (state.resW > 0 && state.resH > 0) {
-      pixPerMmX.textContent = round(state.resW / state.roiW, 1);
-      pixPerMmY.textContent = round(state.resH / state.roiH, 1);
-      mmPerPixX.textContent = round(state.roiW / state.resW, 1);
-      mmPerPixY.textContent = round(state.roiH / state.resH, 1);
+      pixPerMmX.textContent = round(state.resW / aW, 1);
+      pixPerMmY.textContent = round(state.resH / aH, 1);
+      mmPerPixX.textContent = round(aW / state.resW, 1);
+      mmPerPixY.textContent = round(aH / state.resH, 1);
     } else {
       pixPerMmX.textContent = '--';
       pixPerMmY.textContent = '--';
