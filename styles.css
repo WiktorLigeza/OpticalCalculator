@@ -239,6 +239,37 @@ input:read-only.is-derived {
   font-weight: 600;
 }
 
+/* ROI axis (W-fit / H-fit) toggle in group-head */
+.roi-axis-bar {
+  display: flex;
+  gap: 4px;
+  margin-left: auto;
+}
+
+.roi-axis-btn {
+  padding: 4px 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(120, 160, 255, 0.25);
+  background: transparent;
+  color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.4px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.roi-axis-btn:hover {
+  border-color: rgba(34, 255, 136, 0.5);
+  color: var(--text);
+}
+
+.roi-axis-btn.active {
+  border-color: #22ff88;
+  color: #22ff88;
+  background: rgba(34, 255, 136, 0.1);
+  font-weight: 600;
+}
+
 .lock {
   width: 36px;
   height: 36px;

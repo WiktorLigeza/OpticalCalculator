@@ -58,6 +58,21 @@ export function createScene(container) {
   const fitFrustumLines = new THREE.LineSegments(new THREE.BufferGeometry(), fitFrustumMaterial);
   scene.add(fitFrustumLines);
 
+  // Actual sensor coverage plane (green) — what the camera really captures
+  const actualRoiMaterial = new THREE.MeshStandardMaterial({
+    color: 0x22dd77,
+    emissive: 0x082a12,
+    transparent: true,
+    opacity: 0.28,
+    side: THREE.DoubleSide,
+  });
+  const actualRoiWireMaterial = new THREE.LineBasicMaterial({ color: 0x22ff88, transparent: true, opacity: 0.9 });
+  const actualRoiPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), actualRoiMaterial);
+  actualRoiPlane.rotation.x = -Math.PI / 2;
+  scene.add(actualRoiPlane);
+  const actualRoiWire = new THREE.LineSegments(new THREE.BufferGeometry(), actualRoiWireMaterial);
+  scene.add(actualRoiWire);
+
   const dofMaterial = new THREE.LineBasicMaterial({ color: 0xff44cc, transparent: true, opacity: 0.9 });
   const dofNearLines = new THREE.LineSegments(new THREE.BufferGeometry(), dofMaterial);
   scene.add(dofNearLines);
@@ -85,6 +100,8 @@ export function createScene(container) {
     fovH: 0.8,
     roiW: 1.1,
     roiH: 0.7,
+    actualRoiW: 1.1,
+    actualRoiH: 0.7,
     dof: null,
   };
 
@@ -143,21 +160,36 @@ export function createScene(container) {
     cameraBody.position.set(0, distance, 0);
     cameraBody.lookAt(0, 0, 0);
 
-    const fitGeometry = buildFrustum(state.fovW, state.fovH);
+    const fitGeometry = buildFrustum(state.actualRoiW, state.actualRoiH);
     fitFrustumLines.geometry.dispose();
     fitFrustumLines.geometry = fitGeometry;
 
+    // Desired ROI (purple filled plane)
     const roiW = Math.max(state.roiW * SCALE, 0.001);
     const roiH = Math.max(state.roiH * SCALE, 0.001);
     roiPlane.geometry.dispose();
     roiPlane.geometry = new THREE.PlaneGeometry(roiW, roiH);
 
+    // Actual sensor coverage (green plane + wireframe)
+    const aW = Math.max(state.actualRoiW * SCALE, 0.001);
+    const aH = Math.max(state.actualRoiH * SCALE, 0.001);
+    actualRoiPlane.geometry.dispose();
+    actualRoiPlane.geometry = new THREE.PlaneGeometry(aW, aH);
+    actualRoiPlane.position.y = 0.001; // slightly above ground to avoid z-fighting
+    actualRoiWire.geometry.dispose();
+    actualRoiWire.geometry = buildRectWire(0.002, aW / 2, aH / 2);
+
+    // Hide green plane if actual == desired (same dimensions within 0.1mm)
+    const sameDims = Math.abs(state.actualRoiW - state.roiW) < 0.1 && Math.abs(state.actualRoiH - state.roiH) < 0.1;
+    actualRoiPlane.visible = !sameDims;
+    actualRoiWire.visible = !sameDims;
+
     // DoF planes (magenta) — near/far limits relative to camera
     const dof = state.dof;
     if (dof && dof.nearDist > 0) {
       const pad = 1.3;
-      const hw = (roiW * pad) / 2;
-      const hh = (roiH * pad) / 2;
+      const hw = (aW * pad) / 2;
+      const hh = (aH * pad) / 2;
 
       // y=0 is the focus plane; camera is at y=distance
       // nearDist < distance → near plane is above focus plane
@@ -210,10 +242,12 @@ export function createScene(container) {
   return {
     update(values) {
       state.distance = values.distance;
-      state.fovW = values.roiW;
-      state.fovH = values.roiH;
+      state.fovW = values.actualRoiW ?? values.roiW;
+      state.fovH = values.actualRoiH ?? values.roiH;
       state.roiW = values.roiW;
       state.roiH = values.roiH;
+      state.actualRoiW = values.actualRoiW ?? values.roiW;
+      state.actualRoiH = values.actualRoiH ?? values.roiH;
       state.dof = values.dof || null;
       updateGeometry();
     },

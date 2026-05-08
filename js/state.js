@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'opticalcalc_state_v3';
+const STORAGE_KEY = 'opticalcalc_state_v4';
 
 export const DEFAULT_STATE = {
   distance: 2000,
@@ -12,6 +12,7 @@ export const DEFAULT_STATE = {
   resW: 0,
   resH: 0,
   solveFor: 'lens',
+  roiAxis: 'W',  // which ROI dimension is the binding constraint ('W' or 'H')
 };
 
 export function loadState() {

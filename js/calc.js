@@ -8,19 +8,20 @@ const EPS = 1e-6;
  *                                = distance * sensorH / roiH
  */
 export function computeUnlockedGroup(state) {
-  const { distance, sensorW, sensorH, roiW, roiH, focalLength, solveFor } = state;
+  const { distance, sensorW, sensorH, roiW, roiH, focalLength, solveFor, roiAxis } = state;
   const f = Math.max(focalLength, EPS);
   const d = Math.max(distance, EPS);
   const sW = Math.max(sensorW, EPS);
   const sH = Math.max(sensorH, EPS);
   const rW = Math.max(roiW, EPS);
   const rH = Math.max(roiH, EPS);
+  const axis = roiAxis || 'W';
 
   if (solveFor === 'lens') {
-    return { focalLength: d * sW / rW };
+    return { focalLength: axis === 'W' ? d * sW / rW : d * sH / rH };
   }
   if (solveFor === 'distance') {
-    return { distance: f * rW / sW };
+    return { distance: axis === 'W' ? f * rW / sW : f * rH / sH };
   }
   if (solveFor === 'roi') {
     return { roiW: d * sW / f, roiH: d * sH / f };
@@ -29,6 +30,23 @@ export function computeUnlockedGroup(state) {
     return { sensorW: f * rW / d, sensorH: f * rH / d };
   }
   return {};
+}
+
+/**
+ * Given the binding axis and sensor aspect ratio, compute the actual camera
+ * coverage dimensions (what the sensor actually sees at the chosen focal length).
+ * When solveFor === 'roi', the computed values already respect sensor AR.
+ */
+export function computeActualRoi(state) {
+  const { roiW, roiH, sensorW, sensorH, roiAxis, solveFor } = state;
+  if (solveFor === 'roi') {
+    return { actualRoiW: roiW, actualRoiH: roiH };
+  }
+  const ar = Math.max(sensorW, EPS) / Math.max(sensorH, EPS);
+  if ((roiAxis || 'W') === 'W') {
+    return { actualRoiW: roiW, actualRoiH: roiW / ar };
+  }
+  return { actualRoiW: roiH * ar, actualRoiH: roiH };
 }
 
 export function fovDegFromMm(distance, fovMm) {

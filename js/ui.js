@@ -14,6 +14,7 @@ export function bindUI(
   state,
   onInput,
   onSolveFor,
+  onRoiAxis,
   onPresetSave,
   onPresetLoad,
   onPresetDelete,
@@ -33,6 +34,7 @@ export function bindUI(
 
   const lockButtons = document.querySelectorAll('.lock');
   const solveForButtons = document.querySelectorAll('.solve-for-btn');
+  const roiAxisButtons = document.querySelectorAll('.roi-axis-btn');
   const hfovDeg = document.getElementById('hfovDeg');
   const vfovDeg = document.getElementById('vfovDeg');
   const hyperfocalValue = document.getElementById('hyperfocalValue');
@@ -53,16 +55,20 @@ export function bindUI(
   const resetViewBtn = document.getElementById('resetViewBtn');
   const sensorLabel = document.getElementById('sensorLabel');
 
+  function setIfNotFocused(input, value) {
+    if (document.activeElement !== input) input.value = value;
+  }
+
   function updateInputs() {
-    inputs.distance.value = round(state.distance, 1);
-    inputs.sensorW.value = round(state.sensorW, 1);
-    inputs.sensorH.value = round(state.sensorH, 1);
-    inputs.roiW.value = round(state.roiW, 1);
-    inputs.roiH.value = round(state.roiH, 1);
-    inputs.focalLength.value = round(state.focalLength, 1);
-    inputs.fNumber.value = round(state.fNumber, 1);
-    inputs.resW.value = state.resW ? round(state.resW, 0) : '';
-    inputs.resH.value = state.resH ? round(state.resH, 0) : '';
+    setIfNotFocused(inputs.distance, round(state.distance, 1));
+    setIfNotFocused(inputs.sensorW, round(state.sensorW, 1));
+    setIfNotFocused(inputs.sensorH, round(state.sensorH, 1));
+    setIfNotFocused(inputs.roiW, round(state.roiW, 1));
+    setIfNotFocused(inputs.roiH, round(state.roiH, 1));
+    setIfNotFocused(inputs.focalLength, round(state.focalLength, 1));
+    setIfNotFocused(inputs.fNumber, round(state.fNumber, 1));
+    setIfNotFocused(inputs.resW, state.resW ? round(state.resW, 0) : '');
+    setIfNotFocused(inputs.resH, state.resH ? round(state.resH, 0) : '');
     sensorLabel.textContent = state.sensorLabel;
 
     // Highlight active solve-for button
@@ -70,23 +76,44 @@ export function bindUI(
       btn.classList.toggle('active', btn.dataset.solve === state.solveFor);
     });
 
+    // Highlight active roi-axis button
+    roiAxisButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.axis === (state.roiAxis || 'W'));
+    });
+
     // Mark derived (computed) inputs as readonly with distinct style
     Object.entries(inputs).forEach(([key, input]) => {
-      const group = inputGroup[key];
-      if (group) {
-        const isDerived = group === state.solveFor;
-        input.readOnly = isDerived;
-        input.classList.toggle('is-derived', isDerived);
+      let isDerived = false;
+      if (key === 'roiW') {
+        isDerived = state.solveFor === 'roi' || (state.roiAxis || 'W') === 'H';
+      } else if (key === 'roiH') {
+        isDerived = state.solveFor === 'roi' || (state.roiAxis || 'W') === 'W';
+      } else {
+        const group = inputGroup[key];
+        if (group) isDerived = group === state.solveFor;
       }
+      input.readOnly = isDerived;
+      input.classList.toggle('is-derived', isDerived);
     });
+
+    // Show actual coverage in the derived ROI inputs
+    if (state.solveFor !== 'roi') {
+      if ((state.roiAxis || 'W') === 'W' && state.actualRoiH != null) {
+        setIfNotFocused(inputs.roiH, round(state.actualRoiH, 1));
+      } else if ((state.roiAxis || 'W') === 'H' && state.actualRoiW != null) {
+        setIfNotFocused(inputs.roiW, round(state.actualRoiW, 1));
+      }
+    }
   }
 
   function updateDerived() {
-    hfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(state.roiW)
-      ? `${round(fovDegFromMm(state.distance, state.roiW), 1)}°`
+    const aW = state.actualRoiW ?? state.roiW;
+    const aH = state.actualRoiH ?? state.roiH;
+    hfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(aW)
+      ? `${round(fovDegFromMm(state.distance, aW), 1)}°`
       : '--';
-    vfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(state.roiH)
-      ? `${round(fovDegFromMm(state.distance, state.roiH), 1)}°`
+    vfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(aH)
+      ? `${round(fovDegFromMm(state.distance, aH), 1)}°`
       : '--';
 
     const dof = state.dof;
@@ -162,11 +189,9 @@ export function bindUI(
 
   Object.entries(inputs).forEach(([key, input]) => {
     input.addEventListener('input', (event) => {
-      if (event.target.value === '') {
-        onInput(key, 0);
-        return;
-      }
-      const value = Number(event.target.value);
+      const raw = event.target.value.replace(',', '.');
+      if (raw === '' || raw === '-' || raw.endsWith('.')) return; // still typing
+      const value = Number(raw);
       if (Number.isFinite(value)) {
         onInput(key, value);
       }
@@ -182,6 +207,10 @@ export function bindUI(
 
   solveForButtons.forEach((btn) => {
     btn.addEventListener('click', () => onSolveFor(btn.dataset.solve));
+  });
+
+  roiAxisButtons.forEach((btn) => {
+    btn.addEventListener('click', () => onRoiAxis(btn.dataset.axis));
   });
 
   savePresetBtn.addEventListener('click', () => {

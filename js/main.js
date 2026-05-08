@@ -1,5 +1,5 @@
 ﻿import { DEFAULT_STATE, loadState, saveState } from './state.js';
-import { computeUnlockedGroup, computeDoF } from './calc.js';
+import { computeUnlockedGroup, computeActualRoi, computeDoF } from './calc.js';
 import { loadPresets, addPreset, removePreset } from './presets.js';
 import { bindUI } from './ui.js';
 import { createScene } from './three-scene.js';
@@ -10,6 +10,10 @@ let presets = loadPresets();
 function computeDerived() {
   const result = computeUnlockedGroup(state);
   Object.assign(state, result);
+
+  const actual = computeActualRoi(state);
+  state.actualRoiW = actual.actualRoiW;
+  state.actualRoiH = actual.actualRoiH;
 
   const dof = computeDoF(state.distance, state.focalLength, state.fNumber, state.sensorW, state.sensorH);
   state.dof = dof;
@@ -24,6 +28,8 @@ function updateUI() {
     distance: state.distance,
     roiW: state.roiW,
     roiH: state.roiH,
+    actualRoiW: state.actualRoiW,
+    actualRoiH: state.actualRoiH,
     dof: state.dof,
   });
 }
@@ -36,6 +42,12 @@ function updateState(key, value) {
 
 function setSolveFor(key) {
   state.solveFor = key;
+  computeDerived();
+  updateUI();
+}
+
+function setRoiAxis(axis) {
+  state.roiAxis = axis;
   computeDerived();
   updateUI();
 }
@@ -92,6 +104,7 @@ const ui = bindUI(
   state,
   updateState,
   setSolveFor,
+  setRoiAxis,
   handlePresetSave,
   handlePresetLoad,
   handlePresetDelete,
