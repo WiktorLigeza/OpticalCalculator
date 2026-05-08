@@ -34,15 +34,24 @@
           <h2>Inputs</h2>
         </div>
 
+        <div class="group solve-for-group">
+          <div class="group-head">
+            <h3>Solve For</h3>
+          </div>
+          <div class="solve-for-bar">
+            <button class="solve-for-btn" data-solve="sensor">Sensor</button>
+            <button class="solve-for-btn" data-solve="distance">Distance</button>
+            <button class="solve-for-btn" data-solve="roi">ROI</button>
+            <button class="solve-for-btn active" data-solve="lens">Focal Length</button>
+          </div>
+        </div>
+
         <div class="group">
           <div class="group-head">
             <h3>Sensor</h3>
             <div class="meta">
               <span id="sensorLabel">Sony IMX5030</span>
             </div>
-            <button class="lock" data-lock="sensor" aria-pressed="true" title="Lock sensor">
-              <span class="lock-icon"></span>
-            </button>
           </div>
           <div class="row two">
             <label>
@@ -59,9 +68,6 @@
         <div class="group">
           <div class="group-head">
             <h3>Distance</h3>
-            <button class="lock" data-lock="distance" aria-pressed="true" title="Lock distance">
-              <span class="lock-icon"></span>
-            </button>
           </div>
           <div class="row">
             <label>
@@ -74,9 +80,6 @@
         <div class="group">
           <div class="group-head">
             <h3>ROI</h3>
-            <button class="lock" data-lock="roi" aria-pressed="true" title="Lock ROI">
-              <span class="lock-icon"></span>
-            </button>
           </div>
           <div class="row two">
             <label>
@@ -93,9 +96,6 @@
         <div class="group">
           <div class="group-head">
             <h3>Focal Length</h3>
-            <button class="lock" data-lock="lens" aria-pressed="false" title="Lock focal length">
-              <span class="lock-icon"></span>
-            </button>
           </div>
           <div class="row">
             <label>

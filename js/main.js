@@ -7,16 +7,6 @@ import { createScene } from './three-scene.js';
 let state = loadState();
 let presets = loadPresets();
 
-const lockMap = {
-  distance: 'distance',
-  sensorW: 'sensor',
-  sensorH: 'sensor',
-  roiW: 'roi',
-  roiH: 'roi',
-  focalLength: 'lens',
-  fNumber: null, // never locked — pure DoF input
-};
-
 function computeDerived() {
   const result = computeUnlockedGroup(state);
   Object.assign(state, result);
@@ -39,20 +29,13 @@ function updateUI() {
 }
 
 function updateState(key, value) {
-  const lockKey = lockMap[key];
-  if (lockKey && state.locks[lockKey]) {
-    ui.updateStatus(`"${lockKey}" is locked. Unlock to change this value.`, 'error');
-    ui.updateInputs();
-    return;
-  }
-
   state[key] = value;
   computeDerived();
   updateUI();
 }
 
-function toggleLock(key) {
-  state.locks[key] = !state.locks[key];
+function setSolveFor(key) {
+  state.solveFor = key;
   computeDerived();
   updateUI();
 }
@@ -66,16 +49,8 @@ function refreshStatus() {
     ui.updateStatus('Focal length must be positive.', 'error');
     return;
   }
-  const lockedCount = Object.values(state.locks).filter(Boolean).length;
-  if (lockedCount === 4) {
-    ui.updateStatus('All groups locked — unlock one to derive its value.', 'error');
-    return;
-  }
-  if (state.sensorLabel && state.sensorLabel.includes('verify')) {
-    ui.updateStatus('Sensor size is a placeholder. Update to exact dimensions.');
-    return;
-  }
-  ui.updateStatus('All values consistent.');
+  const label = { distance: 'Distance', sensor: 'Sensor', roi: 'ROI', lens: 'Focal Length' };
+  ui.updateStatus(`Solving for: ${label[state.solveFor] ?? state.solveFor}`);
 }
 
 function handlePresetSave(title) {
@@ -97,7 +72,6 @@ function handlePresetLoad(id) {
   const normalized = {
     ...DEFAULT_STATE,
     ...snapshot,
-    locks: { ...DEFAULT_STATE.locks, ...(snapshot.locks || {}) },
   };
 
   Object.keys(state).forEach((key) => delete state[key]);
@@ -117,7 +91,7 @@ const scene = createScene(document.getElementById('sceneWrap'));
 const ui = bindUI(
   state,
   updateState,
-  toggleLock,
+  setSolveFor,
   handlePresetSave,
   handlePresetLoad,
   handlePresetDelete,

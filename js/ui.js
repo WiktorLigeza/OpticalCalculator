@@ -1,6 +1,7 @@
 ﻿import { round, fovDegFromMm } from './calc.js';
 
-const inputLockGroup = {
+// maps input field key → solveFor group name
+const inputGroup = {
   distance: 'distance',
   sensorW: 'sensor',
   sensorH: 'sensor',
@@ -12,7 +13,7 @@ const inputLockGroup = {
 export function bindUI(
   state,
   onInput,
-  onLockToggle,
+  onSolveFor,
   onPresetSave,
   onPresetLoad,
   onPresetDelete,
@@ -31,6 +32,7 @@ export function bindUI(
   };
 
   const lockButtons = document.querySelectorAll('.lock');
+  const solveForButtons = document.querySelectorAll('.solve-for-btn');
   const hfovDeg = document.getElementById('hfovDeg');
   const vfovDeg = document.getElementById('vfovDeg');
   const hyperfocalValue = document.getElementById('hyperfocalValue');
@@ -52,28 +54,28 @@ export function bindUI(
   const sensorLabel = document.getElementById('sensorLabel');
 
   function updateInputs() {
-    inputs.distance.value = round(state.distance, 6);
-    inputs.sensorW.value = round(state.sensorW, 8);
-    inputs.sensorH.value = round(state.sensorH, 8);
-    inputs.roiW.value = round(state.roiW, 6);
-    inputs.roiH.value = round(state.roiH, 6);
-    inputs.focalLength.value = round(state.focalLength, 8);
+    inputs.distance.value = round(state.distance, 1);
+    inputs.sensorW.value = round(state.sensorW, 1);
+    inputs.sensorH.value = round(state.sensorH, 1);
+    inputs.roiW.value = round(state.roiW, 1);
+    inputs.roiH.value = round(state.roiH, 1);
+    inputs.focalLength.value = round(state.focalLength, 1);
     inputs.fNumber.value = round(state.fNumber, 1);
     inputs.resW.value = state.resW ? round(state.resW, 0) : '';
     inputs.resH.value = state.resH ? round(state.resH, 0) : '';
     sensorLabel.textContent = state.sensorLabel;
 
-    lockButtons.forEach((btn) => {
-      const key = btn.dataset.lock;
-      btn.setAttribute('aria-pressed', state.locks[key] ? 'true' : 'false');
+    // Highlight active solve-for button
+    solveForButtons.forEach((btn) => {
+      btn.classList.toggle('active', btn.dataset.solve === state.solveFor);
     });
 
-    // Disable derived (unlocked) inputs — their value is computed, not typed
+    // Mark derived (computed) inputs as readonly with distinct style
     Object.entries(inputs).forEach(([key, input]) => {
-      const group = inputLockGroup[key];
+      const group = inputGroup[key];
       if (group) {
-        const isDerived = !state.locks[group];
-        input.disabled = isDerived;
+        const isDerived = group === state.solveFor;
+        input.readOnly = isDerived;
         input.classList.toggle('is-derived', isDerived);
       }
     });
@@ -81,16 +83,16 @@ export function bindUI(
 
   function updateDerived() {
     hfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(state.roiW)
-      ? `${round(fovDegFromMm(state.distance, state.roiW), 4)}°`
+      ? `${round(fovDegFromMm(state.distance, state.roiW), 1)}°`
       : '--';
     vfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(state.roiH)
-      ? `${round(fovDegFromMm(state.distance, state.roiH), 4)}°`
+      ? `${round(fovDegFromMm(state.distance, state.roiH), 1)}°`
       : '--';
 
     const dof = state.dof;
     if (dof) {
       hyperfocalValue.textContent = `${round(dof.hyperfocal, 1)} mm`;
-      cocValue.textContent = `${round(dof.coc, 5)} mm`;
+      cocValue.textContent = `${round(dof.coc, 1)} mm`;
       dofNearValue.textContent = `${round(dof.nearDist, 1)} mm`;
       dofFarValue.textContent = Number.isFinite(dof.farDist)
         ? `${round(dof.farDist, 1)} mm`
@@ -118,10 +120,10 @@ export function bindUI(
     }
 
     if (state.resW > 0 && state.resH > 0) {
-      pixPerMmX.textContent = round(state.resW / state.roiW, 8);
-      pixPerMmY.textContent = round(state.resH / state.roiH, 8);
-      mmPerPixX.textContent = round(state.roiW / state.resW, 8);
-      mmPerPixY.textContent = round(state.roiH / state.resH, 8);
+      pixPerMmX.textContent = round(state.resW / state.roiW, 1);
+      pixPerMmY.textContent = round(state.resH / state.roiH, 1);
+      mmPerPixX.textContent = round(state.roiW / state.resW, 1);
+      mmPerPixY.textContent = round(state.roiH / state.resH, 1);
     } else {
       pixPerMmX.textContent = '--';
       pixPerMmY.textContent = '--';
@@ -174,76 +176,12 @@ export function bindUI(
   lockButtons.forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.lock;
-      onLockToggle(key);
+      onSolveFor(key);
     });
   });
 
-  savePresetBtn.addEventListener('click', () => {
-    const title = presetTitle.value.trim();
-    onPresetSave(title);
-    presetTitle.value = '';
-  });
-
-  resetViewBtn.addEventListener('click', () => onResetView());
-
-  return { updateInputs, updateDerived, updateStatus, updatePresetList };
-}
-    }
-  }
-
-  function updateStatus(message, type = 'info') {
-    statusMessage.textContent = message;
-    statusMessage.style.color = type === 'error' ? 'var(--error)' : 'var(--muted)';
-  }
-
-  function updatePresetList(presets) {
-    presetList.innerHTML = '';
-    presets.forEach((preset) => {
-      const li = document.createElement('li');
-      li.className = 'preset-item';
-      const title = document.createElement('span');
-      title.textContent = preset.title;
-      const actions = document.createElement('div');
-      actions.className = 'preset-actions';
-      const loadBtn = document.createElement('button');
-      loadBtn.className = 'load';
-      loadBtn.textContent = 'Load';
-      loadBtn.addEventListener('click', () => onPresetLoad(preset.id));
-      const delBtn = document.createElement('button');
-      delBtn.className = 'delete';
-      delBtn.textContent = 'Delete';
-      delBtn.addEventListener('click', () => onPresetDelete(preset.id));
-      actions.append(loadBtn, delBtn);
-      li.append(title, actions);
-      presetList.appendChild(li);
-    });
-  }
-
-  Object.entries(inputs).forEach(([key, input]) => {
-    input.addEventListener('input', (event) => {
-      if (event.target.value === '') {
-        onInput(key, 0);
-        return;
-      }
-      const value = Number(event.target.value);
-      if (Number.isFinite(value)) {
-        onInput(key, value);
-      }
-    });
-  });
-
-  lockButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.lock;
-      onLockToggle(key);
-    });
-  });
-
-  visibilityButtons.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const key = btn.dataset.visible;
-      onVisibilityToggle(key);
-    });
+  solveForButtons.forEach((btn) => {
+    btn.addEventListener('click', () => onSolveFor(btn.dataset.solve));
   });
 
   savePresetBtn.addEventListener('click', () => {

@@ -8,7 +8,7 @@ const EPS = 1e-6;
  *                                = distance * sensorH / roiH
  */
 export function computeUnlockedGroup(state) {
-  const { distance, sensorW, sensorH, roiW, roiH, focalLength, locks } = state;
+  const { distance, sensorW, sensorH, roiW, roiH, focalLength, solveFor } = state;
   const f = Math.max(focalLength, EPS);
   const d = Math.max(distance, EPS);
   const sW = Math.max(sensorW, EPS);
@@ -16,16 +16,16 @@ export function computeUnlockedGroup(state) {
   const rW = Math.max(roiW, EPS);
   const rH = Math.max(roiH, EPS);
 
-  if (!locks.lens) {
+  if (solveFor === 'lens') {
     return { focalLength: d * sW / rW };
   }
-  if (!locks.distance) {
+  if (solveFor === 'distance') {
     return { distance: f * rW / sW };
   }
-  if (!locks.roi) {
+  if (solveFor === 'roi') {
     return { roiW: d * sW / f, roiH: d * sH / f };
   }
-  if (!locks.sensor) {
+  if (solveFor === 'sensor') {
     return { sensorW: f * rW / d, sensorH: f * rH / d };
   }
   return {};

@@ -1,4 +1,4 @@
-const STORAGE_KEY = 'opticalcalc_state_v2';
+const STORAGE_KEY = 'opticalcalc_state_v3';
 
 export const DEFAULT_STATE = {
   distance: 2000,
@@ -11,26 +11,17 @@ export const DEFAULT_STATE = {
   fNumber: 2.8,
   resW: 0,
   resH: 0,
-  locks: {
-    distance: true,
-    sensor: true,
-    roi: true,
-    lens: false,
-  },
+  solveFor: 'lens',
 };
 
 export function loadState() {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (!stored) return { ...DEFAULT_STATE, locks: { ...DEFAULT_STATE.locks } };
+    if (!stored) return { ...DEFAULT_STATE };
     const parsed = JSON.parse(stored);
-    return {
-      ...DEFAULT_STATE,
-      ...parsed,
-      locks: { ...DEFAULT_STATE.locks, ...(parsed.locks || {}) },
-    };
+    return { ...DEFAULT_STATE, ...parsed };
   } catch (err) {
-    return { ...DEFAULT_STATE, locks: { ...DEFAULT_STATE.locks } };
+    return { ...DEFAULT_STATE };
   }
 }
 

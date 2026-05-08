@@ -197,11 +197,46 @@ input:focus {
 }
 
 input.is-derived,
-input:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-  border-color: rgba(120, 160, 255, 0.12);
+input:read-only.is-derived {
+  cursor: default;
+  border-color: rgba(51, 226, 255, 0.5);
+  border-style: dashed;
+  color: var(--accent);
+  background: rgba(51, 226, 255, 0.08);
+}
+
+.solve-for-group {
+  padding-bottom: 12px;
+}
+
+.solve-for-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.solve-for-btn {
+  flex: 1;
+  padding: 9px 4px;
+  border-radius: 10px;
+  border: 1px solid rgba(120, 160, 255, 0.25);
+  background: transparent;
   color: var(--muted);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+
+.solve-for-btn:hover {
+  border-color: rgba(51, 226, 255, 0.5);
+  color: var(--text);
+}
+
+.solve-for-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: rgba(51, 226, 255, 0.12);
+  font-weight: 600;
 }
 
 .lock {
