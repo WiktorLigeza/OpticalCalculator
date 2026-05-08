@@ -1,5 +1,5 @@
 ﻿import { DEFAULT_STATE, loadState, saveState } from './state.js';
-import { computeUnlockedGroup } from './calc.js';
+import { computeUnlockedGroup, computeDoF } from './calc.js';
 import { loadPresets, addPreset, removePreset } from './presets.js';
 import { bindUI } from './ui.js';
 import { createScene } from './three-scene.js';
@@ -14,11 +14,15 @@ const lockMap = {
   roiW: 'roi',
   roiH: 'roi',
   focalLength: 'lens',
+  fNumber: null, // never locked — pure DoF input
 };
 
 function computeDerived() {
   const result = computeUnlockedGroup(state);
   Object.assign(state, result);
+
+  const dof = computeDoF(state.distance, state.focalLength, state.fNumber, state.sensorW, state.sensorH);
+  state.dof = dof;
 }
 
 function updateUI() {
@@ -30,6 +34,7 @@ function updateUI() {
     distance: state.distance,
     roiW: state.roiW,
     roiH: state.roiH,
+    dof: state.dof,
   });
 }
 
@@ -128,4 +133,5 @@ scene.update({
   distance: state.distance,
   roiW: state.roiW,
   roiH: state.roiH,
+  dof: state.dof,
 });

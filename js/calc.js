@@ -37,6 +37,39 @@ export function fovDegFromMm(distance, fovMm) {
   return (halfAngle * 2 * 180) / Math.PI;
 }
 
+/**
+ * Depth of field calculation using hyperfocal method.
+ * Circle of confusion derived from sensor diagonal / 1500 (standard machine-vision CoC).
+ * Hyperfocal: H = f² / (N·c) + f
+ * Near limit:  Dn = H·d / (H + d − f)
+ * Far limit:   Df = H·d / (H − d + f)   [∞ when d ≥ H]
+ */
+export function computeDoF(distance, focalLength, fNumber, sensorW, sensorH) {
+  const d = Math.max(distance, EPS);
+  const f = Math.max(focalLength, EPS);
+  const N = Math.max(fNumber, EPS);
+  const diagonal = Math.sqrt(sensorW * sensorW + sensorH * sensorH);
+  const coc = diagonal / 1500;
+
+  const hyperfocal = (f * f) / (N * coc) + f;
+
+  const nearDist = (hyperfocal * d) / (hyperfocal + d - f);
+
+  const farDenom = hyperfocal - d + f;
+  const farDist = farDenom <= EPS ? Infinity : (hyperfocal * d) / farDenom;
+
+  const dofFront = d - nearDist;
+  const dofBehind = Number.isFinite(farDist) ? farDist - d : Infinity;
+  const dofTotal = Number.isFinite(farDist) ? farDist - nearDist : Infinity;
+
+  // frontFraction: ideally ~0.33 (1/3 rule) at moderate distances
+  const frontFraction = Number.isFinite(dofTotal) && dofTotal > EPS
+    ? dofFront / dofTotal
+    : null;
+
+  return { coc, hyperfocal, nearDist, farDist, dofFront, dofBehind, dofTotal, frontFraction };
+}
+
 export function round(value, digits = 1) {
   const factor = Math.pow(10, digits);
   return Math.round(value * factor) / factor;

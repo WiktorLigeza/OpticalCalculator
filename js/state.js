@@ -8,6 +8,7 @@ export const DEFAULT_STATE = {
   roiW: 850,
   roiH: 1250,
   focalLength: 12,
+  fNumber: 2.8,
   resW: 0,
   resH: 0,
   locks: {

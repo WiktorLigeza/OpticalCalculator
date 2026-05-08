@@ -138,6 +138,11 @@ body {
   margin-bottom: 16px;
 }
 
+.group.dof-group {
+  border-color: rgba(255, 68, 204, 0.28);
+  background: rgba(255, 44, 180, 0.04);
+}
+
 .group-head {
   display: flex;
   align-items: center;

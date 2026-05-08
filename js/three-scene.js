@@ -58,6 +58,23 @@ export function createScene(container) {
   const fitFrustumLines = new THREE.LineSegments(new THREE.BufferGeometry(), fitFrustumMaterial);
   scene.add(fitFrustumLines);
 
+  const dofMaterial = new THREE.LineBasicMaterial({ color: 0xff44cc, transparent: true, opacity: 0.9 });
+  const dofNearLines = new THREE.LineSegments(new THREE.BufferGeometry(), dofMaterial);
+  scene.add(dofNearLines);
+  const dofFarLines = new THREE.LineSegments(new THREE.BufferGeometry(), dofMaterial);
+  scene.add(dofFarLines);
+
+  // Transparent magenta volume between DoF planes
+  const dofVolumeMaterial = new THREE.MeshBasicMaterial({
+    color: 0xff44cc,
+    transparent: true,
+    opacity: 0.04,
+    side: THREE.DoubleSide,
+    depthWrite: false,
+  });
+  const dofVolumeMesh = new THREE.Mesh(new THREE.BufferGeometry(), dofVolumeMaterial);
+  scene.add(dofVolumeMesh);
+
   const roiPlane = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), roiMaterial);
   roiPlane.rotation.x = -Math.PI / 2;
   scene.add(roiPlane);
@@ -68,6 +85,7 @@ export function createScene(container) {
     fovH: 0.8,
     roiW: 1.1,
     roiH: 0.7,
+    dof: null,
   };
 
   function buildFrustum(fovW, fovH) {
@@ -92,6 +110,34 @@ export function createScene(container) {
     return new THREE.BufferGeometry().setFromPoints(points);
   }
 
+  function buildRectWire(y, halfW, halfH) {
+    const corners = [
+      new THREE.Vector3(-halfW, y, -halfH),
+      new THREE.Vector3(halfW, y, -halfH),
+      new THREE.Vector3(halfW, y, halfH),
+      new THREE.Vector3(-halfW, y, halfH),
+    ];
+    const pts = [];
+    for (let i = 0; i < 4; i++) pts.push(corners[i], corners[(i + 1) % 4]);
+    return new THREE.BufferGeometry().setFromPoints(pts);
+  }
+
+  function buildDoFVolume(y0, y1, halfW, halfH) {
+    // Two quads forming top+bottom of a slab (no sides, keeps it subtle)
+    const verts = [];
+    const addQuad = (y) => {
+      verts.push(
+        -halfW, y, -halfH,  halfW, y, -halfH,  halfW, y, halfH,
+        -halfW, y, -halfH,  halfW, y,  halfH, -halfW, y, halfH,
+      );
+    };
+    addQuad(y0);
+    addQuad(y1);
+    const geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+    return geo;
+  }
+
   function updateGeometry() {
     const distance = state.distance * SCALE;
     cameraBody.position.set(0, distance, 0);
@@ -105,6 +151,40 @@ export function createScene(container) {
     const roiH = Math.max(state.roiH * SCALE, 0.001);
     roiPlane.geometry.dispose();
     roiPlane.geometry = new THREE.PlaneGeometry(roiW, roiH);
+
+    // DoF planes (magenta) — near/far limits relative to camera
+    const dof = state.dof;
+    if (dof && dof.nearDist > 0) {
+      const pad = 1.3;
+      const hw = (roiW * pad) / 2;
+      const hh = (roiH * pad) / 2;
+
+      // y=0 is the focus plane; camera is at y=distance
+      // nearDist < distance → near plane is above focus plane
+      const nearY = (state.distance - dof.nearDist) * SCALE;
+      dofNearLines.geometry.dispose();
+      dofNearLines.geometry = buildRectWire(nearY, hw, hh);
+      dofNearLines.visible = true;
+
+      const farVisible = Number.isFinite(dof.farDist) && dof.farDist < state.distance * 5;
+      if (farVisible) {
+        const farY = (state.distance - dof.farDist) * SCALE;
+        dofFarLines.geometry.dispose();
+        dofFarLines.geometry = buildRectWire(farY, hw, hh);
+        dofFarLines.visible = true;
+
+        dofVolumeMesh.geometry.dispose();
+        dofVolumeMesh.geometry = buildDoFVolume(nearY, farY, hw, hh);
+        dofVolumeMesh.visible = true;
+      } else {
+        dofFarLines.visible = false;
+        dofVolumeMesh.visible = false;
+      }
+    } else {
+      dofNearLines.visible = false;
+      dofFarLines.visible = false;
+      dofVolumeMesh.visible = false;
+    }
   }
 
   function resize() {
@@ -134,6 +214,7 @@ export function createScene(container) {
       state.fovH = values.roiH;
       state.roiW = values.roiW;
       state.roiH = values.roiH;
+      state.dof = values.dof || null;
       updateGeometry();
     },
     resetView() {

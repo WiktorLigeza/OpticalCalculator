@@ -25,6 +25,7 @@ export function bindUI(
     roiW: document.getElementById('roiW'),
     roiH: document.getElementById('roiH'),
     focalLength: document.getElementById('focalLength'),
+    fNumber: document.getElementById('fNumber'),
     resW: document.getElementById('resW'),
     resH: document.getElementById('resH'),
   };
@@ -32,6 +33,13 @@ export function bindUI(
   const lockButtons = document.querySelectorAll('.lock');
   const hfovDeg = document.getElementById('hfovDeg');
   const vfovDeg = document.getElementById('vfovDeg');
+  const hyperfocalValue = document.getElementById('hyperfocalValue');
+  const cocValue = document.getElementById('cocValue');
+  const dofNearValue = document.getElementById('dofNearValue');
+  const dofFarValue = document.getElementById('dofFarValue');
+  const dofFrontValue = document.getElementById('dofFrontValue');
+  const dofBehindValue = document.getElementById('dofBehindValue');
+  const dofSplitValue = document.getElementById('dofSplitValue');
   const pixPerMmX = document.getElementById('pixPerMmX');
   const pixPerMmY = document.getElementById('pixPerMmY');
   const mmPerPixX = document.getElementById('mmPerPixX');
@@ -50,6 +58,7 @@ export function bindUI(
     inputs.roiW.value = round(state.roiW, 6);
     inputs.roiH.value = round(state.roiH, 6);
     inputs.focalLength.value = round(state.focalLength, 8);
+    inputs.fNumber.value = round(state.fNumber, 1);
     inputs.resW.value = state.resW ? round(state.resW, 0) : '';
     inputs.resH.value = state.resH ? round(state.resH, 0) : '';
     sensorLabel.textContent = state.sensorLabel;
@@ -77,6 +86,36 @@ export function bindUI(
     vfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(state.roiH)
       ? `${round(fovDegFromMm(state.distance, state.roiH), 4)}°`
       : '--';
+
+    const dof = state.dof;
+    if (dof) {
+      hyperfocalValue.textContent = `${round(dof.hyperfocal, 1)} mm`;
+      cocValue.textContent = `${round(dof.coc, 5)} mm`;
+      dofNearValue.textContent = `${round(dof.nearDist, 1)} mm`;
+      dofFarValue.textContent = Number.isFinite(dof.farDist)
+        ? `${round(dof.farDist, 1)} mm`
+        : '∞';
+      dofFrontValue.textContent = `${round(dof.dofFront, 1)} mm`;
+      dofBehindValue.textContent = Number.isFinite(dof.dofBehind)
+        ? `${round(dof.dofBehind, 1)} mm`
+        : '∞';
+      if (dof.frontFraction !== null) {
+        const pct = round(dof.frontFraction * 100, 1);
+        const behind = round((1 - dof.frontFraction) * 100, 1);
+        const label = Math.abs(dof.frontFraction - 1 / 3) < 0.05 ? ' ≈ 1/3 rule' : '';
+        dofSplitValue.textContent = `${pct}% front / ${behind}% behind${label}`;
+      } else {
+        dofSplitValue.textContent = '∞ far limit';
+      }
+    } else {
+      hyperfocalValue.textContent = '--';
+      cocValue.textContent = '--';
+      dofNearValue.textContent = '--';
+      dofFarValue.textContent = '--';
+      dofFrontValue.textContent = '--';
+      dofBehindValue.textContent = '--';
+      dofSplitValue.textContent = '--';
+    }
 
     if (state.resW > 0 && state.resH > 0) {
       pixPerMmX.textContent = round(state.resW / state.roiW, 8);

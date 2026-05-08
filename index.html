@@ -107,6 +107,18 @@
 
         <div class="group">
           <div class="group-head">
+            <h3>F-Number</h3>
+          </div>
+          <div class="row">
+            <label>
+              <span>F-Number (f/)</span>
+              <input type="number" id="fNumber" min="0.5" max="64" step="0.1" />
+            </label>
+          </div>
+        </div>
+
+        <div class="group">
+          <div class="group-head">
             <h3>Derived</h3>
           </div>
           <div class="row two">
@@ -117,6 +129,48 @@
             <div class="stat">
               <div class="stat-label">VFOV (deg)</div>
               <div class="stat-value" id="vfovDeg">--</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="group dof-group">
+          <div class="group-head">
+            <h3>Depth of Field</h3>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Hyperfocal (mm)</div>
+              <div class="stat-value" id="hyperfocalValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">CoC (mm)</div>
+              <div class="stat-value" id="cocValue">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">Near Focus (mm)</div>
+              <div class="stat-value" id="dofNearValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">Far Focus (mm)</div>
+              <div class="stat-value" id="dofFarValue">--</div>
+            </div>
+          </div>
+          <div class="row two">
+            <div class="stat">
+              <div class="stat-label">DoF Front (mm)</div>
+              <div class="stat-value" id="dofFrontValue">--</div>
+            </div>
+            <div class="stat">
+              <div class="stat-label">DoF Behind (mm)</div>
+              <div class="stat-value" id="dofBehindValue">--</div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="stat">
+              <div class="stat-label">Front / Total split (1/3 rule ≈ 33%)</div>
+              <div class="stat-value" id="dofSplitValue">--</div>
             </div>
           </div>
         </div>
