@@ -37,12 +37,14 @@ export function bindUI(
   const roiAxisButtons = document.querySelectorAll('.roi-axis-btn');
   const hfovDeg = document.getElementById('hfovDeg');
   const vfovDeg = document.getElementById('vfovDeg');
+  const dfovDeg = document.getElementById('dfovDeg');
   const hyperfocalValue = document.getElementById('hyperfocalValue');
   const cocValue = document.getElementById('cocValue');
   const dofNearValue = document.getElementById('dofNearValue');
   const dofFarValue = document.getElementById('dofFarValue');
   const dofFrontValue = document.getElementById('dofFrontValue');
   const dofBehindValue = document.getElementById('dofBehindValue');
+  const dofTotalValue = document.getElementById('dofTotalValue');
   const dofSplitValue = document.getElementById('dofSplitValue');
   const pixPerMmX = document.getElementById('pixPerMmX');
   const pixPerMmY = document.getElementById('pixPerMmY');
@@ -99,6 +101,10 @@ export function bindUI(
     vfovDeg.textContent = Number.isFinite(state.distance) && Number.isFinite(aH)
       ? `${round(fovDegFromMm(state.distance, aH), 1)}°`
       : '--';
+    const diagMm = Math.sqrt(aW * aW + aH * aH);
+    dfovDeg.textContent = Number.isFinite(state.distance) && diagMm > 0
+      ? `${round(fovDegFromMm(state.distance, diagMm), 1)}°`
+      : '--';
 
     const dof = state.dof;
     if (dof) {
@@ -111,6 +117,9 @@ export function bindUI(
       dofFrontValue.textContent = `${round(dof.dofFront, 1)} mm`;
       dofBehindValue.textContent = Number.isFinite(dof.dofBehind)
         ? `${round(dof.dofBehind, 1)} mm`
+        : '∞';
+      dofTotalValue.textContent = Number.isFinite(dof.dofTotal)
+        ? `${round(dof.dofTotal, 1)} mm`
         : '∞';
       if (dof.frontFraction !== null) {
         const pct = round(dof.frontFraction * 100, 1);
@@ -127,6 +136,7 @@ export function bindUI(
       dofFarValue.textContent = '--';
       dofFrontValue.textContent = '--';
       dofBehindValue.textContent = '--';
+      dofTotalValue.textContent = '--';
       dofSplitValue.textContent = '--';
     }
 
